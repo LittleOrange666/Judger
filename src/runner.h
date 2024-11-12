@@ -57,6 +57,7 @@ struct config {
     char *seccomp_rule_name;
     uid_t uid;
     gid_t gid;
+    int reverse_io;
 };
 
 

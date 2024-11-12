@@ -6,7 +6,7 @@
 
 struct arg_lit *verb, *help, *version;
 struct arg_int *max_cpu_time, *max_real_time, *max_memory, *max_stack, *memory_limit_check_only,
-        *max_process_number, *max_output_size, *uid, *gid;
+        *max_process_number, *max_output_size, *uid, *gid, *reverse_io;
 struct arg_str *exe_path, *input_path, *output_path, *error_path, *args, *env, *log_path, *seccomp_rule_name;
 struct arg_end *end;
 
@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
 
             uid = arg_intn(NULL, "uid", INT_PLACE_HOLDER, 0, 1, "UID (default 65534)"),
             gid = arg_intn(NULL, "gid", INT_PLACE_HOLDER, 0, 1, "GID (default 65534)"),
+            reverse_io = arg_intn(NULL, "reverse_io", INT_PLACE_HOLDER, 0, 1, "Whether reverse order of open io files (default 0)"),
 
             end = arg_end(10),
     };
@@ -165,6 +166,12 @@ int main(int argc, char *argv[]) {
     }
     else {
         _config.gid = 65534;
+    }
+
+    if (reverse_io->count > 0) {
+        _config.reverse_io = *reverse_io->ival;
+    } else {
+        _config.reverse_io = 0;
     }
 
     run(&_config, &_result);

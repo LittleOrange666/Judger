@@ -80,29 +80,55 @@ void child_process(FILE *log_fp, struct config *_config) {
             CHILD_ERROR_EXIT(SETRLIMIT_FAILED);
         }
     }
+    if (_config->reverse_io != 0){
+        if (_config->output_path != NULL) {
+            output_file = fopen(_config->output_path, "w");
+            if (output_file == NULL) {
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
+            // redirect stdout -> file
+            if (dup2(fileno(output_file), fileno(stdout)) == -1) {
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
+        }
 
-    if (_config->input_path != NULL) {
-        input_file = fopen(_config->input_path, "r");
-        if (input_file == NULL) {
-            CHILD_ERROR_EXIT(DUP2_FAILED);
+        if (_config->input_path != NULL) {
+            input_file = fopen(_config->input_path, "r");
+            if (input_file == NULL) {
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
+            // redirect file -> stdin
+            // On success, these system calls return the new descriptor.
+            // On error, -1 is returned, and errno is set appropriately.
+            if (dup2(fileno(input_file), fileno(stdin)) == -1) {
+                // todo log
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
         }
-        // redirect file -> stdin
-        // On success, these system calls return the new descriptor.
-        // On error, -1 is returned, and errno is set appropriately.
-        if (dup2(fileno(input_file), fileno(stdin)) == -1) {
-            // todo log
-            CHILD_ERROR_EXIT(DUP2_FAILED);
+    }else{
+        if (_config->input_path != NULL) {
+            input_file = fopen(_config->input_path, "r");
+            if (input_file == NULL) {
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
+            // redirect file -> stdin
+            // On success, these system calls return the new descriptor.
+            // On error, -1 is returned, and errno is set appropriately.
+            if (dup2(fileno(input_file), fileno(stdin)) == -1) {
+                // todo log
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
         }
-    }
 
-    if (_config->output_path != NULL) {
-        output_file = fopen(_config->output_path, "w");
-        if (output_file == NULL) {
-            CHILD_ERROR_EXIT(DUP2_FAILED);
-        }
-        // redirect stdout -> file
-        if (dup2(fileno(output_file), fileno(stdout)) == -1) {
-            CHILD_ERROR_EXIT(DUP2_FAILED);
+        if (_config->output_path != NULL) {
+            output_file = fopen(_config->output_path, "w");
+            if (output_file == NULL) {
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
+            // redirect stdout -> file
+            if (dup2(fileno(output_file), fileno(stdout)) == -1) {
+                CHILD_ERROR_EXIT(DUP2_FAILED);
+            }
         }
     }
 
