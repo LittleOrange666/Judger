@@ -33,6 +33,7 @@ int _c_cpp_seccomp_rules(struct config *_config, bool allow_write_file) {
         SCMP_SYS(rseq),
         SCMP_SYS(set_robust_list),
         SCMP_SYS(set_tid_address),
+        SCMP_SYS(sysinfo),
         SCMP_SYS(write),
         SCMP_SYS(writev)
     };
