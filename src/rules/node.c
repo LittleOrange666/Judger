@@ -9,8 +9,7 @@
 
 
 int node_seccomp_rules(struct config *_config) {
-    int syscalls_blacklist[] = {SCMP_SYS(socket),
-                                SCMP_SYS(fork), SCMP_SYS(vfork),
+    int syscalls_blacklist[] = {SCMP_SYS(fork), SCMP_SYS(vfork),
                                 SCMP_SYS(kill), 
 #ifdef __NR_execveat
                                 SCMP_SYS(execveat)
@@ -27,6 +26,11 @@ int node_seccomp_rules(struct config *_config) {
         if (seccomp_rule_add(ctx, SCMP_ACT_KILL, syscalls_blacklist[i], 0) != 0) {
             return LOAD_SECCOMP_FAILED;
         }
+    }
+    // socket fails with EACCES instead of killing the thread: glibc probes nscd via an AF_UNIX socket
+    // when resolving users (e.g. the JVM at startup) and falls back to /etc/passwd on error
+    if (seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EACCES), SCMP_SYS(socket), 0) != 0) {
+        return LOAD_SECCOMP_FAILED;
     }
     if (seccomp_load(ctx) != 0) {
         return LOAD_SECCOMP_FAILED;
